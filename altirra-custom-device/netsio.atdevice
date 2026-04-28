@@ -644,7 +644,7 @@ event "cold_reset": function
     block_dev1 = $4F; // Poll3, -1 to deactivate
     block_dev2 = $6F; // $6F for PCLink, -1 to deactivate
     skip_current_command = 0;
-    hsio_pending = 0;
+    hsio_pending = 1;
 
     processing_pclink_parblk = 0;
 
