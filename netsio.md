@@ -189,6 +189,8 @@ The speed has an effect when transferring data to emulated Atari. It will appear
 
 In opposite direction, when NetSIO device is receiving data, the bitrate of data is just complementary information. However this information can be used to simulate errors in case the device is currently expecting data to arrive at different bitrate. E.g. this is used by FujiNet to toggle speed between standard 19200 and high speed when specific error threshold is reached.
 
+Altirra custom device option: When `external_clock` is enabled in `netsio.atdevice`, speed change messages also drive Altirra's external SIO clock output using the reported baud rate.
+
 ### Sync response
 
 | Sync response |    |

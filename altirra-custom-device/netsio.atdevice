@@ -11,6 +11,7 @@ event "init": function
     $sio.enable_raw(true);
     Debug.log("NetSIO v0.16");
     [debug] Debug.log("DEBUG enabled");
+    ext_clock_enabled = true;
 };
 
 
@@ -53,6 +54,7 @@ int block_dev1;
 int block_dev2;
 int skip_current_command;
 int hsio_pending;
+int ext_clock_enabled;
 
 Thread command_thread;
 Thread motor_thread;
@@ -572,6 +574,19 @@ event "network_interrupt": function
         //in_cpb = 1789773 / arg;
         in_cpb = 1789760 / arg;
         Debug.log_int("NetSIO to Atari @ ", arg);
+        if (ext_clock_enabled) {
+            int period = 0;
+            if (arg > 0) {
+                period = (1789760 + (arg / 2)) / arg; // cycles per bit, rounded
+            }
+            if (period <= 0 || period > 100000) {
+                $sio.set_external_clock(0, 0);
+                [debug] Debug.log("External clock disabled");
+            } else {
+                $sio.set_external_clock(0, period);
+                [debug] Debug.log_int("External clock period ", period);
+            }
+        }
     }
     if (evt == $88) { // Idle
         idle_tics = 1789760 * arg / 1000;
@@ -631,6 +646,7 @@ event "network_interrupt": function
 
 event "cold_reset": function 
 {
+    ext_clock_enabled = true;
     txbuffer_len = 0;
     rxbuffer_len = 0;
     // assume default 19200 baud
@@ -649,6 +665,9 @@ event "cold_reset": function
     processing_pclink_parblk = 0;
 
     $sio.enable_raw(true);
+    if (ext_clock_enabled) {
+        $sio.set_external_clock(0, 0);
+    }
     motor_thread.run(motor_thread_handler);
     command_thread.run(command_thread_handler);
     rxbyte_thread.run(rxbyte_thread_handler);
